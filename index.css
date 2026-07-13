@@ -1,0 +1,39 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-parchment text-ink font-body antialiased;
+  }
+  h1, h2, h3, h4 {
+    @apply font-display text-ink;
+  }
+  :focus-visible {
+    @apply outline outline-2 outline-offset-2 outline-marigold;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply inline-flex items-center justify-center rounded-full bg-ink text-parchment font-display font-semibold px-6 py-3 hover:bg-ink-700 transition-colors duration-150;
+  }
+  .btn-accent {
+    @apply inline-flex items-center justify-center rounded-full bg-marigold text-ink font-display font-semibold px-6 py-3 hover:bg-marigold-600 transition-colors duration-150;
+  }
+  .btn-outline {
+    @apply inline-flex items-center justify-center rounded-full border-2 border-ink text-ink font-display font-semibold px-6 py-3 hover:bg-ink hover:text-parchment transition-colors duration-150;
+  }
+  .card {
+    @apply bg-white rounded-xl2 border border-ink/10 shadow-sm;
+  }
+  .input-field {
+    @apply w-full rounded-lg border border-ink/20 bg-white px-4 py-2.5 text-ink placeholder:text-slate-650/60 focus:border-marigold focus:ring-0 transition-colors;
+  }
+  .label-text {
+    @apply text-sm font-medium text-slate-650 mb-1 block;
+  }
+  .pill {
+    @apply inline-flex items-center rounded-full bg-marigold-100 text-ink-700 text-xs font-medium px-3 py-1;
+  }
+}
