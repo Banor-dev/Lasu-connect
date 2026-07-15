@@ -1,19 +1,1170 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>LASU Professional Connect</title>
-    <meta name="description" content="Find help or find customers, right around LASU. Post what you need, browse what's on offer, and chat it out — all in one app." />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap"
-      rel="stylesheet"
-    />
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>LASU Connect - Campus Marketplace</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        lasu: {
+                            primary: '#1e3a5f',
+                            secondary: '#c9a227',
+                            accent: '#2d5a87',
+                            light: '#f0f4f8',
+                            dark: '#0f1f33',
+                            success: '#22c55e',
+                            warning: '#f59e0b',
+                            danger: '#ef4444'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        * { -webkit-tap-highlight-color: transparent; }
+        body { font-family: 'Inter', sans-serif; background: #f8fafc; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .slide-in { animation: slideIn 0.3s ease-out; }
+        @keyframes slideIn { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .fade-in { animation: fadeIn 0.2s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .pulse-dot { animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        .message-bubble { max-width: 75%; word-wrap: break-word; }
+        .tab-active { color: #1e3a5f; border-bottom: 2px solid #c9a227; }
+        .tab-inactive { color: #94a3b8; }
+        .card-hover { transition: all 0.2s ease; }
+        .card-hover:hover { transform: translateY(-2px); box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); }
+        .btn-press:active { transform: scale(0.97); }
+        .overlay { backdrop-filter: blur(4px); }
+        .category-pill { transition: all 0.2s; }
+        .category-pill.active { background: #1e3a5f; color: white; }
+        .typing-indicator span { display: inline-block; width: 6px; height: 6px; background: #94a3b8; border-radius: 50%; animation: typing 1.4s infinite; margin: 0 1px; }
+        .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+        .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes typing { 0%, 60%, 100% { transform: translateY(0); } 30% { transform: translateY(-4px); } }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+
+<!-- APP CONTAINER -->
+<div id="app" class="max-w-md mx-auto bg-white min-h-screen shadow-2xl relative overflow-hidden">
+
+    <!-- SPLASH SCREEN -->
+    <div id="splash-screen" class="fixed inset-0 bg-lasu-primary z-50 flex flex-col items-center justify-center">
+        <div class="w-24 h-24 bg-white/10 rounded-3xl flex items-center justify-center mb-6 backdrop-blur-sm border border-white/20">
+            <i class="fas fa-handshake text-5xl text-lasu-secondary"></i>
+        </div>
+        <h1 class="text-3xl font-bold text-white mb-2">LASU Connect</h1>
+        <p class="text-white/70 text-sm">Campus Marketplace & Services</p>
+        <div class="mt-12 flex space-x-2">
+            <div class="w-2 h-2 bg-lasu-secondary rounded-full pulse-dot"></div>
+            <div class="w-2 h-2 bg-lasu-secondary/50 rounded-full pulse-dot" style="animation-delay:0.3s"></div>
+            <div class="w-2 h-2 bg-lasu-secondary/30 rounded-full pulse-dot" style="animation-delay:0.6s"></div>
+        </div>
+    </div>
+
+    <!-- AUTH SCREEN -->
+    <div id="auth-screen" class="hidden fixed inset-0 bg-white z-40 flex flex-col">
+        <div class="flex-1 flex flex-col items-center justify-center px-8">
+            <div class="w-20 h-20 bg-lasu-primary rounded-2xl flex items-center justify-center mb-6 shadow-lg">
+                <i class="fas fa-handshake text-3xl text-lasu-secondary"></i>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-900 mb-2">Welcome to LASU</h2>
+            <p class="text-gray-500 text-center text-sm mb-8">Connect with students & locals for services, gigs, and opportunities around campus.</p>
+            <div class="w-full space-y-3">
+                <button onclick="auth.login('student')" class="w-full bg-lasu-primary text-white py-3.5 rounded-xl font-semibold btn-press flex items-center justify-center space-x-2 shadow-lg shadow-lasu-primary/30">
+                    <i class="fas fa-graduation-cap"></i>
+                    <span>Continue as Student</span>
+                </button>
+                <button onclick="auth.login('provider')" class="w-full bg-white border-2 border-lasu-primary text-lasu-primary py-3.5 rounded-xl font-semibold btn-press flex items-center justify-center space-x-2">
+                    <i class="fas fa-briefcase"></i>
+                    <span>Continue as Service Provider</span>
+                </button>
+            </div>
+            <p class="text-xs text-gray-400 mt-6 text-center">By continuing, you agree to our Terms & Privacy Policy</p>
+        </div>
+        <div class="p-6 text-center">
+            <div class="flex items-center justify-center space-x-4 text-xs text-gray-400">
+                <span><i class="fas fa-shield-alt text-lasu-success mr-1"></i>Verified Users</span>
+                <span><i class="fas fa-lock text-lasu-success mr-1"></i>Secure Payments</span>
+                <span><i class="fas fa-map-marker-alt text-lasu-success mr-1"></i>Hyperlocal</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN APP -->
+    <div id="main-app" class="hidden flex flex-col h-screen">
+
+        <!-- Header -->
+        <header class="bg-lasu-primary text-white px-4 py-3 sticky top-0 z-30 shadow-md">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                    <div class="w-8 h-8 bg-white/10 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-handshake text-lasu-secondary text-sm"></i>
+                    </div>
+                    <div>
+                        <h1 class="font-bold text-sm leading-tight">LASU Connect</h1>
+                        <p class="text-[10px] text-white/60">Ojo Campus</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <button onclick="nav.showNotifications()" class="relative w-8 h-8 bg-white/10 rounded-lg flex items-center justify-center btn-press">
+                        <i class="fas fa-bell text-sm"></i>
+                        <span class="absolute -top-0.5 -right-0.5 w-4 h-4 bg-lasu-danger rounded-full text-[9px] flex items-center justify-center font-bold">3</span>
+                    </button>
+                    <button onclick="nav.showProfile()" class="w-8 h-8 bg-lasu-secondary rounded-lg flex items-center justify-center btn-press">
+                        <i class="fas fa-user text-lasu-primary text-sm"></i>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Search Bar -->
+        <div class="px-4 py-3 bg-white border-b border-gray-100 sticky top-[52px] z-20">
+            <div class="relative">
+                <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+                <input type="text" id="search-input" placeholder="Search services, skills, or needs..." 
+                    class="w-full bg-gray-100 rounded-xl py-2.5 pl-10 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-lasu-primary/20"
+                    oninput="feed.filterListings(this.value)">
+            </div>
+            <div class="flex space-x-2 mt-3 overflow-x-auto hide-scrollbar pb-1" id="category-filters">
+                <button onclick="feed.setCategory('all')" class="category-pill active px-4 py-1.5 rounded-full text-xs font-medium whitespace-nowrap bg-gray-100 text-gray-600">All</button>
+                <button onclick="feed.setCategory('tutoring')" class="category-pill px-4 py-1.5 rounded-full text-xs font-medium whitespace-nowrap bg-gray-100 text-gray-600">📚 Tutoring</button>
+                <button onclick="feed.setCategory('design')" class="category-pill px-4 py-1.5 rounded-full text-xs font-medium whitespace-nowrap bg-gray-100 text-gray-600">🎨 Design</button>
+                <button onclick="feed.setCategory('tech')" class="category-pill px-4 py-1.5 rounded-full text-xs font-medium whitespace-nowrap bg-gray-100 text-gray-600">💻 Tech</button>
+                <button onclick="feed.setCategory('events')" class="category-pill px-4 py-1.5 rounded-full text-xs font-medium whitespace-nowrap bg-gray-100 text-gray-600">🎉 Events</button>
+                <button onclick="feed.setCategory('creative')" class="category-pill px-4 py-1.5 rounded-full text-xs font-medium whitespace-nowrap bg-gray-100 text-gray-600">🎬 Creative</button>
+                <button onclick="feed.setCategory('errands')" class="category-pill px-4 py-1.5 rounded-full text-xs font-medium whitespace-nowrap bg-gray-100 text-gray-600">🛒 Errands</button>
+            </div>
+        </div>
+
+        <!-- Content Area -->
+        <div id="content-area" class="flex-1 overflow-y-auto hide-scrollbar pb-20">
+            <!-- Feed View -->
+            <div id="feed-view" class="slide-in">
+                <div class="px-4 py-3">
+                    <div class="flex items-center justify-between mb-3">
+                        <h2 class="font-bold text-gray-800 text-sm">Available Now</h2>
+                        <div class="flex bg-gray-100 rounded-lg p-0.5">
+                            <button onclick="feed.setType('all')" id="tab-all" class="tab-active px-3 py-1 text-xs font-medium rounded-md transition-all">All</button>
+                            <button onclick="feed.setType('requests')" id="tab-requests" class="tab-inactive px-3 py-1 text-xs font-medium rounded-md transition-all">Needs</button>
+                            <button onclick="feed.setType('offers')" id="tab-offers" class="tab-inactive px-3 py-1 text-xs font-medium rounded-md transition-all">Offers</button>
+                        </div>
+                    </div>
+                </div>
+                <div id="listings-container" class="px-4 space-y-3 pb-4"></div>
+            </div>
+
+            <!-- Post View -->
+            <div id="post-view" class="hidden slide-in px-4 py-4">
+                <h2 class="font-bold text-lg text-gray-800 mb-4">Post a Gig</h2>
+                <form id="post-form" onsubmit="feed.handlePost(event)">
+                    <div class="space-y-4">
+                        <div>
+                            <label class="text-xs font-semibold text-gray-600 mb-1 block">I want to...</label>
+                            <div class="grid grid-cols-2 gap-3">
+                                <label class="cursor-pointer">
+                                    <input type="radio" name="postType" value="request" class="hidden peer" checked>
+                                    <div class="peer-checked:bg-lasu-primary peer-checked:text-white bg-gray-100 text-gray-600 rounded-xl py-3 text-center text-sm font-medium transition-all border-2 border-transparent peer-checked:border-lasu-primary">
+                                        <i class="fas fa-hand-holding-usd mb-1 block text-lg"></i>
+                                        Request a Service
+                                    </div>
+                                </label>
+                                <label class="cursor-pointer">
+                                    <input type="radio" name="postType" value="offer" class="hidden peer">
+                                    <div class="peer-checked:bg-lasu-primary peer-checked:text-white bg-gray-100 text-gray-600 rounded-xl py-3 text-center text-sm font-medium transition-all border-2 border-transparent peer-checked:border-lasu-primary">
+                                        <i class="fas fa-briefcase mb-1 block text-lg"></i>
+                                        Offer a Service
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="text-xs font-semibold text-gray-600 mb-1 block">Title</label>
+                            <input type="text" name="title" required placeholder="e.g., Need a Graphic Designer for Flyer" 
+                                class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-lasu-primary/20 focus:border-lasu-primary">
+                        </div>
+                        <div>
+                            <label class="text-xs font-semibold text-gray-600 mb-1 block">Category</label>
+                            <select name="category" required class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-lasu-primary/20 focus:border-lasu-primary">
+                                <option value="">Select category...</option>
+                                <option value="tutoring">📚 Tutoring & Academic</option>
+                                <option value="design">🎨 Graphic Design</option>
+                                <option value="tech">💻 Tech & Programming</option>
+                                <option value="events">🎉 Event Services</option>
+                                <option value="creative">🎬 Photography & Video</option>
+                                <option value="errands">🛒 Errands & Delivery</option>
+                                <option value="writing">✍️ Writing & Content</option>
+                                <option value="fashion">👗 Fashion & Tailoring</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="text-xs font-semibold text-gray-600 mb-1 block">Description</label>
+                            <textarea name="description" required rows="3" placeholder="Describe what you need or offer in detail..." 
+                                class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-lasu-primary/20 focus:border-lasu-primary resize-none"></textarea>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="text-xs font-semibold text-gray-600 mb-1 block">Budget (₦)</label>
+                                <input type="number" name="budget" required placeholder="5000" 
+                                    class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-lasu-primary/20 focus:border-lasu-primary">
+                            </div>
+                            <div>
+                                <label class="text-xs font-semibold text-gray-600 mb-1 block">Location</label>
+                                <select name="location" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-lasu-primary/20 focus:border-lasu-primary">
+                                    <option value="Main Campus">Main Campus</option>
+                                    <option value="Epe Campus">Epe Campus</option>
+                                    <option value="Iba">Iba</option>
+                                    <option value="Ojo">Ojo</option>
+                                    <option value="Iyana-Iba">Iyana-Iba</option>
+                                    <option value="Online">Online/Remote</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="text-xs font-semibold text-gray-600 mb-1 block">Urgency</label>
+                            <div class="flex space-x-2">
+                                <label class="flex-1 cursor-pointer">
+                                    <input type="radio" name="urgency" value="low" class="hidden peer">
+                                    <div class="peer-checked:bg-lasu-success peer-checked:text-white bg-gray-100 text-gray-600 rounded-lg py-2 text-center text-xs font-medium transition-all">Flexible</div>
+                                </label>
+                                <label class="flex-1 cursor-pointer">
+                                    <input type="radio" name="urgency" value="medium" class="hidden peer" checked>
+                                    <div class="peer-checked:bg-lasu-warning peer-checked:text-white bg-gray-100 text-gray-600 rounded-lg py-2 text-center text-xs font-medium transition-all">Soon</div>
+                                </label>
+                                <label class="flex-1 cursor-pointer">
+                                    <input type="radio" name="urgency" value="high" class="hidden peer">
+                                    <div class="peer-checked:bg-lasu-danger peer-checked:text-white bg-gray-100 text-gray-600 rounded-lg py-2 text-center text-xs font-medium transition-all">ASAP</div>
+                                </label>
+                            </div>
+                        </div>
+                        <button type="submit" class="w-full bg-lasu-primary text-white py-3.5 rounded-xl font-semibold btn-press shadow-lg shadow-lasu-primary/30 flex items-center justify-center space-x-2">
+                            <i class="fas fa-paper-plane"></i>
+                            <span>Post Gig</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Messages View -->
+            <div id="messages-view" class="hidden slide-in">
+                <div class="px-4 py-3 border-b border-gray-100">
+                    <h2 class="font-bold text-lg text-gray-800">Messages</h2>
+                    <p class="text-xs text-gray-500 mt-0.5">Your conversations with buyers & sellers</p>
+                </div>
+                <div id="conversations-list" class="divide-y divide-gray-100"></div>
+            </div>
+
+            <!-- Wallet View -->
+            <div id="wallet-view" class="hidden slide-in">
+                <div class="bg-lasu-primary px-4 py-6 text-white">
+                    <p class="text-white/70 text-xs mb-1">Total Balance</p>
+                    <h2 class="text-3xl font-bold" id="wallet-balance">₦24,500</h2>
+                    <div class="flex space-x-4 mt-4">
+                        <div class="bg-white/10 rounded-lg px-3 py-2 flex-1">
+                            <p class="text-[10px] text-white/60">In Escrow</p>
+                            <p class="font-semibold text-sm">₦8,000</p>
+                        </div>
+                        <div class="bg-white/10 rounded-lg px-3 py-2 flex-1">
+                            <p class="text-[10px] text-white/60">Available</p>
+                            <p class="font-semibold text-sm">₦16,500</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="px-4 py-4">
+                    <div class="grid grid-cols-2 gap-3 mb-6">
+                        <button class="bg-lasu-success/10 text-lasu-success rounded-xl py-3 font-semibold text-sm btn-press flex items-center justify-center space-x-2">
+                            <i class="fas fa-plus-circle"></i>
+                            <span>Fund Wallet</span>
+                        </button>
+                        <button class="bg-lasu-primary/10 text-lasu-primary rounded-xl py-3 font-semibold text-sm btn-press flex items-center justify-center space-x-2">
+                            <i class="fas fa-arrow-down"></i>
+                            <span>Withdraw</span>
+                        </button>
+                    </div>
+                    <h3 class="font-bold text-sm text-gray-800 mb-3">Recent Transactions</h3>
+                    <div id="transactions-list" class="space-y-3"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Navigation -->
+        <nav class="bg-white border-t border-gray-200 px-2 py-2 sticky bottom-0 z-30">
+            <div class="flex items-center justify-around">
+                <button onclick="nav.switchTab('feed')" id="nav-feed" class="nav-item flex flex-col items-center py-1 px-3 rounded-lg text-lasu-primary">
+                    <i class="fas fa-home text-lg mb-0.5"></i>
+                    <span class="text-[10px] font-medium">Home</span>
+                </button>
+                <button onclick="nav.switchTab('messages')" id="nav-messages" class="nav-item flex flex-col items-center py-1 px-3 rounded-lg text-gray-400">
+                    <div class="relative">
+                        <i class="fas fa-comment-dots text-lg mb-0.5"></i>
+                        <span class="absolute -top-1 -right-2 w-4 h-4 bg-lasu-danger rounded-full text-[9px] text-white flex items-center justify-center font-bold">2</span>
+                    </div>
+                    <span class="text-[10px] font-medium">Messages</span>
+                </button>
+                <button onclick="nav.showPost()" class="bg-lasu-primary text-white w-12 h-12 rounded-full flex items-center justify-center shadow-lg shadow-lasu-primary/40 -mt-6 btn-press border-4 border-white">
+                    <i class="fas fa-plus text-lg"></i>
+                </button>
+                <button onclick="nav.switchTab('wallet')" id="nav-wallet" class="nav-item flex flex-col items-center py-1 px-3 rounded-lg text-gray-400">
+                    <i class="fas fa-wallet text-lg mb-0.5"></i>
+                    <span class="text-[10px] font-medium">Wallet</span>
+                </button>
+                <button onclick="nav.showProfile()" id="nav-profile" class="nav-item flex flex-col items-center py-1 px-3 rounded-lg text-gray-400">
+                    <i class="fas fa-user text-lg mb-0.5"></i>
+                    <span class="text-[10px] font-medium">Profile</span>
+                </button>
+            </div>
+        </nav>
+    </div>
+
+    <!-- LISTING DETAIL MODAL -->
+    <div id="listing-modal" class="hidden fixed inset-0 z-50">
+        <div class="overlay absolute inset-0 bg-black/50" onclick="modals.closeListing()"></div>
+        <div class="absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl max-h-[90vh] overflow-y-auto slide-in">
+            <div class="sticky top-0 bg-white z-10 px-4 py-3 border-b border-gray-100 flex items-center justify-between">
+                <h3 class="font-bold text-sm">Gig Details</h3>
+                <button onclick="modals.closeListing()" class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
+                    <i class="fas fa-times text-gray-500 text-sm"></i>
+                </button>
+            </div>
+            <div id="listing-detail-content" class="p-4"></div>
+        </div>
+    </div>
+
+    <!-- CHAT MODAL -->
+    <div id="chat-modal" class="hidden fixed inset-0 z-50 bg-white flex flex-col">
+        <div class="bg-lasu-primary text-white px-4 py-3 flex items-center space-x-3">
+            <button onclick="modals.closeChat()" class="w-8 h-8 bg-white/10 rounded-lg flex items-center justify-center btn-press">
+                <i class="fas fa-arrow-left text-sm"></i>
+            </button>
+            <div class="flex-1 flex items-center space-x-3">
+                <div class="w-10 h-10 bg-lasu-secondary rounded-full flex items-center justify-center">
+                    <i class="fas fa-user text-lasu-primary"></i>
+                </div>
+                <div>
+                    <h3 class="font-semibold text-sm" id="chat-partner-name">User Name</h3>
+                    <p class="text-[10px] text-white/70" id="chat-partner-status">Online</p>
+                </div>
+            </div>
+            <button class="w-8 h-8 bg-white/10 rounded-lg flex items-center justify-center btn-press">
+                <i class="fas fa-ellipsis-v text-sm"></i>
+            </button>
+        </div>
+        <div id="chat-messages" class="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50"></div>
+        <div class="bg-white border-t border-gray-200 p-3">
+            <div class="flex items-center space-x-2">
+                <button class="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-gray-500 btn-press">
+                    <i class="fas fa-paperclip"></i>
+                </button>
+                <input type="text" id="chat-input" placeholder="Type a message..." 
+                    class="flex-1 bg-gray-100 rounded-full px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-lasu-primary/20"
+                    onkeypress="if(event.key==='Enter') chat.sendMessage()">
+                <button onclick="chat.sendMessage()" class="w-10 h-10 bg-lasu-primary rounded-full flex items-center justify-center text-white btn-press">
+                    <i class="fas fa-paper-plane text-sm"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- PROFILE MODAL -->
+    <div id="profile-modal" class="hidden fixed inset-0 z-50">
+        <div class="overlay absolute inset-0 bg-black/50" onclick="modals.closeProfile()"></div>
+        <div class="absolute right-0 top-0 bottom-0 w-80 bg-white shadow-2xl slide-in overflow-y-auto">
+            <div class="bg-lasu-primary text-white p-6">
+                <button onclick="modals.closeProfile()" class="absolute top-4 right-4 w-8 h-8 bg-white/10 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-times text-sm"></i>
+                </button>
+                <div class="w-16 h-16 bg-lasu-secondary rounded-full flex items-center justify-center mx-auto mb-3">
+                    <i class="fas fa-user text-2xl text-lasu-primary"></i>
+                </div>
+                <h3 class="font-bold text-center">Adeola O.</h3>
+                <p class="text-xs text-white/70 text-center">Computer Science • 300L</p>
+                <div class="flex items-center justify-center mt-2 space-x-1">
+                    <i class="fas fa-star text-lasu-secondary text-xs"></i>
+                    <span class="text-sm font-semibold">4.8</span>
+                    <span class="text-xs text-white/60">(12 reviews)</span>
+                </div>
+                <div class="flex items-center justify-center mt-2">
+                    <span class="bg-lasu-success/20 text-lasu-success text-[10px] px-2 py-0.5 rounded-full font-medium">
+                        <i class="fas fa-check-circle mr-1"></i>Verified Student
+                    </span>
+                </div>
+            </div>
+            <div class="p-4 space-y-1">
+                <button class="w-full flex items-center space-x-3 p-3 rounded-xl hover:bg-gray-50 transition-colors text-left">
+                    <div class="w-10 h-10 bg-lasu-primary/10 rounded-lg flex items-center justify-center text-lasu-primary">
+                        <i class="fas fa-user-edit"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-800">Edit Profile</p>
+                        <p class="text-xs text-gray-500">Update your info & skills</p>
+                    </div>
+                </button>
+                <button class="w-full flex items-center space-x-3 p-3 rounded-xl hover:bg-gray-50 transition-colors text-left">
+                    <div class="w-10 h-10 bg-lasu-warning/10 rounded-lg flex items-center justify-center text-lasu-warning">
+                        <i class="fas fa-list"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-800">My Listings</p>
+                        <p class="text-xs text-gray-500">3 active gigs</p>
+                    </div>
+                </button>
+                <button class="w-full flex items-center space-x-3 p-3 rounded-xl hover:bg-gray-50 transition-colors text-left">
+                    <div class="w-10 h-10 bg-lasu-success/10 rounded-lg flex items-center justify-center text-lasu-success">
+                        <i class="fas fa-history"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-800">Transaction History</p>
+                        <p class="text-xs text-gray-500">View past payments</p>
+                    </div>
+                </button>
+                <button class="w-full flex items-center space-x-3 p-3 rounded-xl hover:bg-gray-50 transition-colors text-left">
+                    <div class="w-10 h-10 bg-lasu-danger/10 rounded-lg flex items-center justify-center text-lasu-danger">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-800">Verification</p>
+                        <p class="text-xs text-gray-500">Student ID verified</p>
+                    </div>
+                </button>
+                <div class="border-t border-gray-100 my-2"></div>
+                <button onclick="auth.logout()" class="w-full flex items-center space-x-3 p-3 rounded-xl hover:bg-gray-50 transition-colors text-left text-lasu-danger">
+                    <div class="w-10 h-10 bg-lasu-danger/10 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </div>
+                    <p class="text-sm font-medium">Log Out</p>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- NOTIFICATIONS MODAL -->
+    <div id="notifications-modal" class="hidden fixed inset-0 z-50">
+        <div class="overlay absolute inset-0 bg-black/50" onclick="modals.closeNotifications()"></div>
+        <div class="absolute top-0 right-0 bottom-0 w-full max-w-sm bg-white shadow-2xl slide-in">
+            <div class="bg-lasu-primary text-white px-4 py-4 flex items-center justify-between">
+                <h3 class="font-bold">Notifications</h3>
+                <button onclick="modals.closeNotifications()" class="w-8 h-8 bg-white/10 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-times text-sm"></i>
+                </button>
+            </div>
+            <div class="divide-y divide-gray-100">
+                <div class="p-4 bg-lasu-primary/5">
+                    <div class="flex items-start space-x-3">
+                        <div class="w-8 h-8 bg-lasu-success rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                            <i class="fas fa-check text-white text-xs"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-800">Your gig "Graphic Design for Event" has a new applicant!</p>
+                            <p class="text-xs text-gray-500 mt-1">2 minutes ago</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-4">
+                    <div class="flex items-start space-x-3">
+                        <div class="w-8 h-8 bg-lasu-secondary rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                            <i class="fas fa-comment text-lasu-primary text-xs"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-800">Chidi sent you a message about the tutoring gig</p>
+                            <p class="text-xs text-gray-500 mt-1">15 minutes ago</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-4">
+                    <div class="flex items-start space-x-3">
+                        <div class="w-8 h-8 bg-lasu-primary rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                            <i class="fas fa-wallet text-white text-xs"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-800">₦5,000 has been released from escrow to your wallet</p>
+                            <p class="text-xs text-gray-500 mt-1">1 hour ago</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PAYMENT MODAL -->
+    <div id="payment-modal" class="hidden fixed inset-0 z-50">
+        <div class="overlay absolute inset-0 bg-black/50" onclick="modals.closePayment()"></div>
+        <div class="absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl p-6 slide-in">
+            <div class="w-12 h-1 bg-gray-300 rounded-full mx-auto mb-4"></div>
+            <h3 class="font-bold text-lg text-gray-800 mb-1">Confirm Payment</h3>
+            <p class="text-sm text-gray-500 mb-4">Funds will be held in escrow until service is completed</p>
+            <div class="bg-gray-50 rounded-xl p-4 mb-4">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-sm text-gray-600">Service Fee</span>
+                    <span class="text-sm font-semibold" id="payment-amount">₦5,000</span>
+                </div>
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-sm text-gray-600">Platform Fee (5%)</span>
+                    <span class="text-sm font-semibold">₦250</span>
+                </div>
+                <div class="border-t border-gray-200 my-2"></div>
+                <div class="flex justify-between items-center">
+                    <span class="text-sm font-semibold text-gray-800">Total</span>
+                    <span class="text-lg font-bold text-lasu-primary" id="payment-total">₦5,250</span>
+                </div>
+            </div>
+            <div class="space-y-2">
+                <button onclick="wallet.processPayment()" class="w-full bg-lasu-primary text-white py-3.5 rounded-xl font-semibold btn-press shadow-lg shadow-lasu-primary/30">
+                    Pay from Wallet
+                </button>
+                <button onclick="modals.closePayment()" class="w-full bg-gray-100 text-gray-600 py-3 rounded-xl font-medium btn-press">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="hidden fixed top-4 left-4 right-4 z-[60] bg-gray-900 text-white px-4 py-3 rounded-xl shadow-lg flex items-center space-x-3 slide-in">
+        <i class="fas fa-check-circle text-lasu-success"></i>
+        <span id="toast-message" class="text-sm">Action completed successfully</span>
+    </div>
+
+</div>
+
+<script>
+// ==================== DATA STORE ====================
+const store = {
+    currentUser: null,
+    currentTab: 'feed',
+    currentCategory: 'all',
+    currentType: 'all',
+    activeChat: null,
+    walletBalance: 24500,
+
+    listings: [
+        {
+            id: 1,
+            type: 'request',
+            title: 'Need Graphic Designer for Dept Party Flyer',
+            description: 'Looking for someone who can design a catchy flyer for our departmental end-of-session party. Need it by Friday. Must include LASU branding and event details.',
+            category: 'design',
+            budget: 5000,
+            location: 'Main Campus',
+            urgency: 'high',
+            author: { name: 'Fatima B.', dept: 'Mass Comm', level: '300L', rating: 4.7, verified: true },
+            posted: '2 hours ago',
+            applicants: 3,
+            image: null
+        },
+        {
+            id: 2,
+            type: 'offer',
+            title: 'Professional Photography for Events',
+            description: 'I offer event photography services around LASU campus. Graduation shoots, birthday coverage, departmental events. I have professional equipment and can deliver edited photos within 48 hours.',
+            category: 'creative',
+            budget: 15000,
+            location: 'Main Campus',
+            urgency: 'low',
+            author: { name: 'Emmanuel K.', dept: 'Theatre Arts', level: '400L', rating: 4.9, verified: true },
+            posted: '5 hours ago',
+            applicants: 0,
+            image: null
+        },
+        {
+            id: 3,
+            type: 'request',
+            title: 'Math Tutor Needed - MTH 101',
+            description: 'Struggling with Calculus I. Need a 200L+ student who aced MTH 101 to tutor me twice a week. Preferably evenings at the library. Willing to pay per session.',
+            category: 'tutoring',
+            budget: 2000,
+            location: 'Main Campus',
+            urgency: 'medium',
+            author: { name: 'Chidi O.', dept: 'Computer Science', level: '100L', rating: 0, verified: true },
+            posted: '30 mins ago',
+            applicants: 1,
+            image: null
+        },
+        {
+            id: 4,
+            type: 'offer',
+            title: 'Laptop Repair & Software Installation',
+            description: 'Fix slow laptops, virus removal, Windows/macOS installation, software setup. I work from my room at Moremi Hall. Quick turnaround, affordable prices.',
+            category: 'tech',
+            budget: 3000,
+            location: 'Main Campus',
+            urgency: 'low',
+            author: { name: 'Tunde A.', dept: 'Computer Science', level: '300L', rating: 4.5, verified: true },
+            posted: '1 day ago',
+            applicants: 0,
+            image: null
+        },
+        {
+            id: 5,
+            type: 'request',
+            title: 'Need Someone to Type & Print My Project',
+            description: 'My project is handwritten and needs to be typed, formatted properly, and printed. About 50 pages. Need it done by next Wednesday.',
+            category: 'errands',
+            budget: 4000,
+            location: 'Main Campus',
+            urgency: 'high',
+            author: { name: 'Amaka N.', dept: 'English', level: '400L', rating: 4.2, verified: true },
+            posted: '3 hours ago',
+            applicants: 5,
+            image: null
+        },
+        {
+            id: 6,
+            type: 'offer',
+            title: 'Content Writing & Essay Help',
+            description: 'I write essays, articles, blog posts, and help with research papers. English major with a strong portfolio. Can help with proofreading and editing too.',
+            category: 'writing',
+            budget: 2500,
+            location: 'Online',
+            urgency: 'low',
+            author: { name: 'Blessing E.', dept: 'English', level: '300L', rating: 4.8, verified: true },
+            posted: '2 days ago',
+            applicants: 0,
+            image: null
+        },
+        {
+            id: 7,
+            type: 'request',
+            title: 'DJ Needed for Hall Week Party',
+            description: 'Looking for a student DJ with own equipment for our hall week party. Event is next Saturday at Moremi Hall. Must have experience with campus events.',
+            category: 'events',
+            budget: 10000,
+            location: 'Main Campus',
+            urgency: 'high',
+            author: { name: 'Jide M.', dept: 'Political Science', level: '300L', rating: 4.3, verified: true },
+            posted: '1 hour ago',
+            applicants: 2,
+            image: null
+        },
+        {
+            id: 8,
+            type: 'offer',
+            title: 'Fashion Design & Tailoring Services',
+            description: 'I make custom outfits, alter clothes, and do quick fixes. Based at Iba but can deliver to campus. Specialize in native wear and casuals.',
+            category: 'fashion',
+            budget: 8000,
+            location: 'Iba',
+            urgency: 'low',
+            author: { name: 'Ngozi I.', dept: 'Theatre Arts', level: '200L', rating: 4.6, verified: false },
+            posted: '4 hours ago',
+            applicants: 0,
+            image: null
+        }
+    ],
+
+    conversations: [
+        {
+            id: 1,
+            partner: { name: 'Fatima B.', dept: 'Mass Comm', level: '300L', online: true },
+            lastMessage: 'Yes, I can start on it tomorrow. What colors do you prefer?',
+            time: '2m ago',
+            unread: 2,
+            messages: [
+                { sender: 'them', text: 'Hi! I saw your gig for the flyer design.', time: '10:30 AM' },
+                { sender: 'me', text: "Hello! I'm interested. Can you tell me more about what you need?", time: '10:32 AM' },
+                { sender: 'them', text: "It's for our departmental party. I need something vibrant with LASU colors.", time: '10:33 AM' },
+                { sender: 'them', text: 'Yes, I can start on it tomorrow. What colors do you prefer?', time: '10:35 AM' }
+            ]
+        },
+        {
+            id: 2,
+            partner: { name: 'Tunde A.', dept: 'Computer Science', level: '300L', online: false },
+            lastMessage: 'I can fix it by evening. Bring it to Moremi Hall.',
+            time: '1h ago',
+            unread: 0,
+            messages: [
+                { sender: 'me', text: 'Hey, my laptop is really slow. Can you help?', time: '9:00 AM' },
+                { sender: 'them', text: "Sure, what's the issue exactly?", time: '9:15 AM' },
+                { sender: 'me', text: 'Takes forever to boot and apps crash.', time: '9:20 AM' },
+                { sender: 'them', text: 'I can fix it by evening. Bring it to Moremi Hall.', time: '9:30 AM' }
+            ]
+        },
+        {
+            id: 3,
+            partner: { name: 'Chidi O.', dept: 'Computer Science', level: '100L', online: true },
+            lastMessage: 'Thanks! When can we start?',
+            time: '15m ago',
+            unread: 1,
+            messages: [
+                { sender: 'them', text: 'Hi, I saw your tutoring offer for MTH 101.', time: '11:00 AM' },
+                { sender: 'me', text: 'Yes, I got an A in that course. When do you need help?', time: '11:05 AM' },
+                { sender: 'them', text: 'Thanks! When can we start?', time: '11:10 AM' }
+            ]
+        }
+    ],
+
+    transactions: [
+        { id: 1, type: 'credit', desc: 'Payment received - Flyer Design', amount: 5000, date: 'Today, 10:30 AM', status: 'completed' },
+        { id: 2, type: 'debit', desc: 'Escrow hold - Tutoring Session', amount: 2000, date: 'Yesterday, 4:00 PM', status: 'pending' },
+        { id: 3, type: 'credit', desc: 'Wallet funding', amount: 10000, date: 'Jul 5, 2026', status: 'completed' },
+        { id: 4, type: 'debit', desc: 'Platform fee - Photography Gig', amount: 750, date: 'Jul 3, 2026', status: 'completed' },
+        { id: 5, type: 'credit', desc: 'Payment received - Essay Writing', amount: 2500, date: 'Jul 1, 2026', status: 'completed' }
+    ]
+};
+
+// ==================== UI HELPERS ====================
+const ui = {
+    showToast(message) {
+        const toast = document.getElementById('toast');
+        document.getElementById('toast-message').textContent = message;
+        toast.classList.remove('hidden');
+        setTimeout(function() { toast.classList.add('hidden'); }, 3000);
+    }
+};
+
+// ==================== AUTHENTICATION ====================
+const auth = {
+    login(type) {
+        store.currentUser = {
+            type: type,
+            name: type === 'student' ? 'Adeola O.' : 'Service Provider',
+            dept: 'Computer Science',
+            level: '300L',
+            rating: 4.8,
+            verified: true
+        };
+        document.getElementById('auth-screen').classList.add('hidden');
+        document.getElementById('main-app').classList.remove('hidden');
+        document.getElementById('main-app').classList.add('flex');
+        feed.renderListings();
+        messages.renderConversations();
+        wallet.renderTransactions();
+        ui.showToast('Welcome to LASU Connect!');
+    },
+
+    logout() {
+        store.currentUser = null;
+        modals.closeProfile();
+        document.getElementById('main-app').classList.add('hidden');
+        document.getElementById('main-app').classList.remove('flex');
+        document.getElementById('auth-screen').classList.remove('hidden');
+    }
+};
+
+// ==================== NAVIGATION ====================
+const nav = {
+    switchTab(tab) {
+        store.currentTab = tab;
+
+        document.querySelectorAll('.nav-item').forEach(function(el) {
+            el.classList.remove('text-lasu-primary');
+            el.classList.add('text-gray-400');
+        });
+        document.getElementById('nav-' + tab).classList.remove('text-gray-400');
+        document.getElementById('nav-' + tab).classList.add('text-lasu-primary');
+
+        ['feed', 'messages', 'wallet'].forEach(function(v) {
+            document.getElementById(v + '-view').classList.add('hidden');
+        });
+        document.getElementById(tab + '-view').classList.remove('hidden');
+
+        if (tab === 'messages') messages.renderConversations();
+        if (tab === 'wallet') wallet.renderTransactions();
+    },
+
+    showPost() {
+        document.getElementById('post-view').classList.remove('hidden');
+        document.getElementById('feed-view').classList.add('hidden');
+        document.getElementById('messages-view').classList.add('hidden');
+        document.getElementById('wallet-view').classList.add('hidden');
+    },
+
+    showProfile() {
+        document.getElementById('profile-modal').classList.remove('hidden');
+    },
+
+    showNotifications() {
+        document.getElementById('notifications-modal').classList.remove('hidden');
+    }
+};
+
+// ==================== FEED ====================
+const feed = {
+    setCategory(cat) {
+        store.currentCategory = cat;
+        document.querySelectorAll('.category-pill').forEach(function(pill) {
+            pill.classList.remove('active');
+        });
+        event.target.classList.add('active');
+        feed.renderListings();
+    },
+
+    setType(type) {
+        store.currentType = type;
+        document.getElementById('tab-all').className = type === 'all' ? 'tab-active px-3 py-1 text-xs font-medium rounded-md transition-all' : 'tab-inactive px-3 py-1 text-xs font-medium rounded-md transition-all';
+        document.getElementById('tab-requests').className = type === 'requests' ? 'tab-active px-3 py-1 text-xs font-medium rounded-md transition-all' : 'tab-inactive px-3 py-1 text-xs font-medium rounded-md transition-all';
+        document.getElementById('tab-offers').className = type === 'offers' ? 'tab-active px-3 py-1 text-xs font-medium rounded-md transition-all' : 'tab-inactive px-3 py-1 text-xs font-medium rounded-md transition-all';
+        feed.renderListings();
+    },
+
+    filterListings(query) {
+        feed.renderListings(query.toLowerCase());
+    },
+
+    getCategoryIcon(cat) {
+        const icons = {
+            tutoring: '📚', design: '🎨', tech: '💻', events: '🎉',
+            creative: '🎬', errands: '🛒', writing: '✍️', fashion: '👗'
+        };
+        return icons[cat] || '📌';
+    },
+
+    getCategoryLabel(cat) {
+        const labels = {
+            tutoring: 'Tutoring', design: 'Design', tech: 'Tech',
+            events: 'Events', creative: 'Creative', errands: 'Errands',
+            writing: 'Writing', fashion: 'Fashion'
+        };
+        return labels[cat] || cat;
+    },
+
+    getUrgencyColor(urgency) {
+        return {
+            high: 'bg-lasu-danger/10 text-lasu-danger',
+            medium: 'bg-lasu-warning/10 text-lasu-warning',
+            low: 'bg-lasu-success/10 text-lasu-success'
+        }[urgency] || 'bg-gray-100 text-gray-600';
+    },
+
+    getUrgencyLabel(urgency) {
+        return { high: 'ASAP', medium: 'Soon', low: 'Flexible' }[urgency] || urgency;
+    },
+
+    renderListings(searchQuery) {
+        searchQuery = searchQuery || '';
+        const container = document.getElementById('listings-container');
+        let filtered = store.listings;
+
+        if (store.currentCategory !== 'all') {
+            filtered = filtered.filter(function(l) { return l.category === store.currentCategory; });
+        }
+        if (store.currentType !== 'all') {
+            filtered = filtered.filter(function(l) { return l.type === store.currentType; });
+        }
+        if (searchQuery) {
+            filtered = filtered.filter(function(l) { 
+                return l.title.toLowerCase().includes(searchQuery) || 
+                    l.description.toLowerCase().includes(searchQuery) ||
+                    l.category.toLowerCase().includes(searchQuery);
+            });
+        }
+
+        if (filtered.length === 0) {
+            container.innerHTML = '<div class="text-center py-12"><div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3"><i class="fas fa-search text-gray-400 text-xl"></i></div><p class="text-gray-500 text-sm">No gigs found</p><p class="text-gray-400 text-xs mt-1">Try adjusting your filters</p></div>';
+            return;
+        }
+
+        container.innerHTML = filtered.map(function(listing) {
+            return '<div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 card-hover cursor-pointer" onclick="modals.showListing(' + listing.id + ')">' +
+                '<div class="flex items-start justify-between mb-2">' +
+                    '<div class="flex items-center space-x-2">' +
+                        '<span class="text-lg">' + feed.getCategoryIcon(listing.category) + '</span>' +
+                        '<span class="text-xs font-medium text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">' + feed.getCategoryLabel(listing.category) + '</span>' +
+                        '<span class="text-[10px] font-medium px-2 py-0.5 rounded-full ' + feed.getUrgencyColor(listing.urgency) + '">' + feed.getUrgencyLabel(listing.urgency) + '</span>' +
+                    '</div>' +
+                    '<span class="text-[10px] text-gray-400">' + listing.posted + '</span>' +
+                '</div>' +
+                '<div class="flex items-start space-x-1 mb-2">' +
+                    '<span class="text-[10px] font-bold px-1.5 py-0.5 rounded ' + (listing.type === 'request' ? 'bg-lasu-primary/10 text-lasu-primary' : 'bg-lasu-success/10 text-lasu-success') + '">' +
+                        (listing.type === 'request' ? 'NEEDS' : 'OFFERS') +
+                    '</span>' +
+                    '<h3 class="font-semibold text-sm text-gray-800 leading-tight flex-1">' + listing.title + '</h3>' +
+                '</div>' +
+                '<p class="text-xs text-gray-500 line-clamp-2 mb-3">' + listing.description + '</p>' +
+                '<div class="flex items-center justify-between">' +
+                    '<div class="flex items-center space-x-2">' +
+                        '<div class="w-6 h-6 bg-lasu-primary/10 rounded-full flex items-center justify-center">' +
+                            '<i class="fas fa-user text-[10px] text-lasu-primary"></i>' +
+                        '</div>' +
+                        '<div>' +
+                            '<p class="text-[11px] font-medium text-gray-700">' + listing.author.name + '</p>' +
+                            '<p class="text-[9px] text-gray-400">' + listing.author.dept + ' &bull; ' + listing.author.level + '</p>' +
+                        '</div>' +
+                        (listing.author.verified ? '<span class="text-lasu-success text-[10px]"><i class="fas fa-check-circle"></i></span>' : '') +
+                    '</div>' +
+                    '<div class="text-right">' +
+                        '<p class="text-sm font-bold text-lasu-primary">₦' + listing.budget.toLocaleString() + '</p>' +
+                        '<p class="text-[9px] text-gray-400"><i class="fas fa-map-marker-alt mr-0.5"></i>' + listing.location + '</p>' +
+                    '</div>' +
+                '</div>' +
+                (listing.type === 'request' && listing.applicants > 0 ? 
+                    '<div class="mt-2 pt-2 border-t border-gray-100 flex items-center justify-between">' +
+                        '<span class="text-[10px] text-gray-500">' + listing.applicants + ' applicant' + (listing.applicants > 1 ? 's' : '') + '</span>' +
+                        '<button class="text-[10px] font-medium text-lasu-primary">View Details <i class="fas fa-chevron-right ml-0.5"></i></button>' +
+                    '</div>' : '') +
+            '</div>';
+        }).join('');
+    },
+
+    handlePost(e) {
+        e.preventDefault();
+        const form = e.target;
+        const newListing = {
+            id: Date.now(),
+            type: form.postType.value,
+            title: form.title.value,
+            description: form.description.value,
+            category: form.category.value,
+            budget: parseInt(form.budget.value),
+            location: form.location.value,
+            urgency: form.urgency.value,
+            author: { name: 'Adeola O.', dept: 'Computer Science', level: '300L', rating: 4.8, verified: true },
+            posted: 'Just now',
+            applicants: 0,
+            image: null
+        };
+        store.listings.unshift(newListing);
+        feed.renderListings();
+        form.reset();
+
+        document.getElementById('post-view').classList.add('hidden');
+        document.getElementById('feed-view').classList.remove('hidden');
+        nav.switchTab('feed');
+        ui.showToast('Gig posted successfully!');
+    }
+};
+
+// ==================== MESSAGES ====================
+const messages = {
+    renderConversations() {
+        const container = document.getElementById('conversations-list');
+        container.innerHTML = store.conversations.map(function(conv) {
+            return '<div class="p-4 flex items-center space-x-3 cursor-pointer hover:bg-gray-50 transition-colors" onclick="modals.openChat(' + conv.id + ')">' +
+                '<div class="relative">' +
+                    '<div class="w-12 h-12 bg-lasu-primary/10 rounded-full flex items-center justify-center">' +
+                        '<i class="fas fa-user text-lasu-primary"></i>' +
+                    '</div>' +
+                    (conv.partner.online ? '<span class="absolute bottom-0 right-0 w-3 h-3 bg-lasu-success rounded-full border-2 border-white"></span>' : '') +
+                '</div>' +
+                '<div class="flex-1 min-w-0">' +
+                    '<div class="flex items-center justify-between mb-0.5">' +
+                        '<h4 class="font-semibold text-sm text-gray-800">' + conv.partner.name + '</h4>' +
+                        '<span class="text-[10px] text-gray-400">' + conv.time + '</span>' +
+                    '</div>' +
+                    '<p class="text-xs text-gray-500 truncate">' + conv.lastMessage + '</p>' +
+                '</div>' +
+                (conv.unread > 0 ? '<span class="w-5 h-5 bg-lasu-primary rounded-full text-white text-[10px] flex items-center justify-center font-bold flex-shrink-0">' + conv.unread + '</span>' : '') +
+            '</div>';
+        }).join('');
+    }
+};
+
+// ==================== CHAT ====================
+const chat = {
+    open(conversationId) {
+        store.activeChat = conversationId;
+        const conv = store.conversations.find(function(c) { return c.id === conversationId; });
+        document.getElementById('chat-partner-name').textContent = conv.partner.name;
+        document.getElementById('chat-partner-status').textContent = conv.partner.online ? 'Online' : 'Last seen recently';
+        chat.renderMessages();
+        document.getElementById('chat-modal').classList.remove('hidden');
+        conv.unread = 0;
+        messages.renderConversations();
+    },
+
+    renderMessages() {
+        const conv = store.conversations.find(function(c) { return c.id === store.activeChat; });
+        const container = document.getElementById('chat-messages');
+        container.innerHTML = conv.messages.map(function(msg) {
+            return '<div class="flex ' + (msg.sender === 'me' ? 'justify-end' : 'justify-start') + '">' +
+                '<div class="message-bubble ' + (msg.sender === 'me' ? 'bg-lasu-primary text-white rounded-2xl rounded-br-md' : 'bg-white text-gray-800 rounded-2xl rounded-bl-md shadow-sm') + ' px-4 py-2.5">' +
+                    '<p class="text-sm">' + msg.text + '</p>' +
+                    '<p class="text-[10px] mt-1 ' + (msg.sender === 'me' ? 'text-white/60' : 'text-gray-400') + '">' + msg.time + '</p>' +
+                '</div>' +
+            '</div>';
+        }).join('');
+        container.scrollTop = container.scrollHeight;
+    },
+
+    sendMessage() {
+        const input = document.getElementById('chat-input');
+        const text = input.value.trim();
+        if (!text) return;
+
+        const conv = store.conversations.find(function(c) { return c.id === store.activeChat; });
+        const now = new Date();
+        const time = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+
+        conv.messages.push({ sender: 'me', text: text, time: time });
+        conv.lastMessage = text;
+        conv.time = 'Just now';
+        chat.renderMessages();
+        input.value = '';
+
+        setTimeout(function() {
+            const replies = [
+                'That sounds great! When can we meet?',
+                "Perfect, I'll get started on that right away.",
+                'Sure, no problem. What time works for you?',
+                "Got it! I'll send you the details shortly.",
+                'Awesome, looking forward to working with you!'
+            ];
+            const reply = replies[Math.floor(Math.random() * replies.length)];
+            conv.messages.push({ sender: 'them', text: reply, time: time });
+            conv.lastMessage = reply;
+            chat.renderMessages();
+            messages.renderConversations();
+        }, 2000);
+    }
+};
+
+// ==================== WALLET ====================
+const wallet = {
+    renderTransactions() {
+        const container = document.getElementById('transactions-list');
+        container.innerHTML = store.transactions.map(function(tx) {
+            return '<div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl">' +
+                '<div class="flex items-center space-x-3">' +
+                    '<div class="w-10 h-10 ' + (tx.type === 'credit' ? 'bg-lasu-success/10 text-lasu-success' : 'bg-lasu-danger/10 text-lasu-danger') + ' rounded-full flex items-center justify-center">' +
+                        '<i class="fas fa-' + (tx.type === 'credit' ? 'arrow-down' : 'arrow-up') + '"></i>' +
+                    '</div>' +
+                    '<div>' +
+                        '<p class="text-sm font-medium text-gray-800">' + tx.desc + '</p>' +
+                        '<p class="text-[10px] text-gray-500">' + tx.date + '</p>' +
+                    '</div>' +
+                '</div>' +
+                '<div class="text-right">' +
+                    '<p class="text-sm font-bold ' + (tx.type === 'credit' ? 'text-lasu-success' : 'text-lasu-danger') + '">' + (tx.type === 'credit' ? '+' : '-') + '₦' + tx.amount.toLocaleString() + '</p>' +
+                    '<span class="text-[10px] px-2 py-0.5 rounded-full ' + (tx.status === 'completed' ? 'bg-lasu-success/10 text-lasu-success' : 'bg-lasu-warning/10 text-lasu-warning') + '">' + tx.status + '</span>' +
+                '</div>' +
+            '</div>';
+        }).join('');
+    },
+
+    showPayment(listingId) {
+        const listing = store.listings.find(function(l) { return l.id === listingId; });
+        document.getElementById('payment-amount').textContent = '₦' + listing.budget.toLocaleString();
+        document.getElementById('payment-total').textContent = '₦' + Math.round(listing.budget * 1.05).toLocaleString();
+        document.getElementById('payment-modal').classList.remove('hidden');
+    },
+
+    processPayment() {
+        modals.closePayment();
+        ui.showToast('Payment processed! Funds held in escrow.');
+        store.walletBalance -= 5250;
+        document.getElementById('wallet-balance').textContent = '₦' + store.walletBalance.toLocaleString();
+    }
+};
+
+// ==================== MODALS ====================
+const modals = {
+    showListing(id) {
+        const listing = store.listings.find(function(l) { return l.id === id; });
+        const content = document.getElementById('listing-detail-content');
+        content.innerHTML = 
+            '<div class="flex items-center space-x-2 mb-3">' +
+                '<span class="text-2xl">' + feed.getCategoryIcon(listing.category) + '</span>' +
+                '<div>' +
+                    '<span class="text-xs font-medium text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">' + feed.getCategoryLabel(listing.category) + '</span>' +
+                    '<span class="text-[10px] font-medium px-2 py-0.5 rounded-full ' + feed.getUrgencyColor(listing.urgency) + ' ml-1">' + feed.getUrgencyLabel(listing.urgency) + '</span>' +
+                '</div>' +
+            '</div>' +
+            '<div class="flex items-center space-x-1 mb-3">' +
+                '<span class="text-[10px] font-bold px-1.5 py-0.5 rounded ' + (listing.type === 'request' ? 'bg-lasu-primary/10 text-lasu-primary' : 'bg-lasu-success/10 text-lasu-success') + '">' +
+                    (listing.type === 'request' ? 'SERVICE REQUEST' : 'SERVICE OFFER') +
+                '</span>' +
+            '</div>' +
+            '<h2 class="text-lg font-bold text-gray-800 mb-2">' + listing.title + '</h2>' +
+            '<p class="text-sm text-gray-600 mb-4 leading-relaxed">' + listing.description + '</p>' +
+
+            '<div class="bg-gray-50 rounded-xl p-4 mb-4">' +
+                '<div class="grid grid-cols-2 gap-3">' +
+                    '<div>' +
+                        '<p class="text-[10px] text-gray-500 uppercase tracking-wide">Budget</p>' +
+                        '<p class="text-lg font-bold text-lasu-primary">₦' + listing.budget.toLocaleString() + '</p>' +
+                    '</div>' +
+                    '<div>' +
+                        '<p class="text-[10px] text-gray-500 uppercase tracking-wide">Location</p>' +
+                        '<p class="text-sm font-semibold text-gray-800"><i class="fas fa-map-marker-alt text-lasu-primary mr-1"></i>' + listing.location + '</p>' +
+                    '</div>' +
+                    '<div>' +
+                        '<p class="text-[10px] text-gray-500 uppercase tracking-wide">Posted</p>' +
+                        '<p class="text-sm font-semibold text-gray-800">' + listing.posted + '</p>' +
+                    '</div>' +
+                    '<div>' +
+                        '<p class="text-[10px] text-gray-500 uppercase tracking-wide">Applicants</p>' +
+                        '<p class="text-sm font-semibold text-gray-800">' + listing.applicants + '</p>' +
+                    '</div>' +
+                '</div>' +
+            '</div>' +
+
+            '<div class="bg-lasu-primary/5 rounded-xl p-4 mb-4">' +
+                '<div class="flex items-center space-x-3">' +
+                    '<div class="w-12 h-12 bg-lasu-primary/10 rounded-full flex items-center justify-center">' +
+                        '<i class="fas fa-user text-lasu-primary"></i>' +
+                    '</div>' +
+                    '<div>' +
+                        '<div class="flex items-center space-x-1">' +
+                            '<h4 class="font-semibold text-sm text-gray-800">' + listing.author.name + '</h4>' +
+                            (listing.author.verified ? '<span class="text-lasu-success text-xs"><i class="fas fa-check-circle"></i></span>' : '') +
+                        '</div>' +
+                        '<p class="text-xs text-gray-500">' + listing.author.dept + ' &bull; ' + listing.author.level + '</p>' +
+                        '<div class="flex items-center space-x-1 mt-0.5">' +
+                            '<i class="fas fa-star text-lasu-secondary text-[10px]"></i>' +
+                            '<span class="text-xs font-medium">' + listing.author.rating + '</span>' +
+                        '</div>' +
+                    '</div>' +
+                '</div>' +
+            '</div>' +
+
+            '<div class="space-y-2">' +
+                '<button onclick="chat.open(1); modals.closeListing();" class="w-full bg-lasu-primary text-white py-3.5 rounded-xl font-semibold btn-press shadow-lg shadow-lasu-primary/30 flex items-center justify-center space-x-2">' +
+                    '<i class="fas fa-comment-dots"></i>' +
+                    '<span>Message ' + listing.author.name.split(' ')[0] + '</span>' +
+                '</button>' +
+                '<button onclick="wallet.showPayment(' + listing.id + ')" class="w-full bg-lasu-secondary text-lasu-primary py-3 rounded-xl font-semibold btn-press flex items-center justify-center space-x-2">' +
+                    '<i class="fas fa-lock"></i>' +
+                    '<span>Pay with Escrow</span>' +
+                '</button>' +
+            '</div>';
+
+        document.getElementById('listing-modal').classList.remove('hidden');
+    },
+
+    closeListing() {
+        document.getElementById('listing-modal').classList.add('hidden');
+    },
+
+    openChat(conversationId) {
+        chat.open(conversationId);
+    },
+
+    closeChat() {
+        document.getElementById('chat-modal').classList.add('hidden');
+        store.activeChat = null;
+    },
+
+    closeProfile() {
+        document.getElementById('profile-modal').classList.add('hidden');
+    },
+
+    closeNotifications() {
+        document.getElementById('notifications-modal').classList.add('hidden');
+    },
+
+    closePayment() {
+        document.getElementById('payment-modal').classList.add('hidden');
+    }
+};
+
+// ==================== APP INIT ====================
+window.onload = function() {
+    setTimeout(function() {
+        document.getElementById('splash-screen').classList.add('hidden');
+        document.getElementById('auth-screen').classList.remove('hidden');
+    }, 2000);
+};
+</script>
+
+</body>
 </html>
